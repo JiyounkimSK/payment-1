@@ -13,13 +13,28 @@ public class Payment {
     private Integer price;
     private String paymentAction;
 
-    @PostPersist
-    public void onPostPersist(){
+    @PrePersist
+    public void onPrePersist(){
         PaymentApproved paymentApproved = new PaymentApproved();
         BeanUtils.copyProperties(this, paymentApproved);
-        paymentApproved.publishAfterCommit();
+        
+        
+            //바로 이벤트를 보내버리면 주문정보가 커밋되기도 전에 배송발송됨 이벤트가 발송되어 주문테이블의 상태가 바뀌지 않을 수 있다.
+            // TX 리스너는 커밋이 완료된 후에 이벤트를 발생하도록 만들어준다.
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void beforeCommit(boolean readOnly) {
+                    paymentApproved.publish();
+                }
+            });
 
 
+            try {
+                Thread.currentThread().sleep((long) (400 + Math.random() * 220));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        
     }
 
     @PostUpdate
