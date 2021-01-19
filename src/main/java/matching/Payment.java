@@ -32,7 +32,7 @@ public class Payment {
         });
 
         try {
-            Thread.currentThread().sleep((long) (400 + Math.random() * 220));
+            Thread.currentThread().sleep((long) (400 + Math.random() * 300));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
